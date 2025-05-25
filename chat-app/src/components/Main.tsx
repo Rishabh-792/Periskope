@@ -1,20 +1,23 @@
 'use client'
 
-import { BsEmojiSmile, BsSearch } from 'react-icons/bs'
+import { BsEmojiSmile } from 'react-icons/bs'
 import { IoMdSend, IoMdTime } from 'react-icons/io'
-import { HiSparkles, HiOutlineSparkles } from 'react-icons/hi'
-import { FaUserCircle, FaPollH } from 'react-icons/fa'
+import { HiOutlineSparkles } from 'react-icons/hi'
+import { FaPollH } from 'react-icons/fa'
 import { ImAttachment } from 'react-icons/im'
 import { FaMicrophone } from 'react-icons/fa6'
 import { PiClockClockwise } from 'react-icons/pi'
+import { BsCheck, BsCheckAll } from 'react-icons/bs'
 
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Chat, Message } from '@/types'
+import { Chat} from '@/types'
 import Image from 'next/image'
 
 import avatar from '../assets/avatar.png';
 import whatsappBg from '../assets/bg.png';
+
+import { formatDateLabel } from '@/utils/dateUtils'
 
 type Props = {
   selectedChat: Chat | null
@@ -27,8 +30,26 @@ export default function Main({ selectedChat, userId }: Props) {
   const [participants, setParticipants] = useState<any[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  const hasScrolledInitially = useRef(false)
+
   useEffect(() => {
+
     if (!selectedChat?.id) return
+
+    const markAsSeen = async () => {
+      const unseenIds = messages
+        .filter(m => m.sender_id !== userId && !m.seen)
+        .map(m => m.id)
+
+      if (unseenIds.length) {
+        await supabase
+          .from('messages')
+          .update({ seen: true })
+          .in('id', unseenIds)
+      }
+    }
+
+    markAsSeen()
 
     const fetchMessages = async () => {
       const { data } = await supabase
@@ -81,16 +102,31 @@ export default function Main({ selectedChat, userId }: Props) {
 
           if (enriched) {
             setMessages((prev) => [...prev, enriched])
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+            setTimeout(() => {
+              bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+            }, 50)
           }
         }
       )
       .subscribe()
 
+      console.log(`Listening to realtime messages for chat ${selectedChat.id}`)
+      
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [selectedChat?.id])
+    
+  }, [selectedChat?.id, messages, userId])
+
+  useEffect(() => {
+    if (!hasScrolledInitially.current && messages.length > 0) {
+      hasScrolledInitially.current = true
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 50)
+    }
+}, [messages])
+
 
   const sendMessage = async () => {
     if (!message.trim() || !userId || !selectedChat) return
@@ -105,24 +141,51 @@ export default function Main({ selectedChat, userId }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const groupedMessages: Record<string, typeof messages> = messages.reduce((acc, msg) => {
+    const dateKey = new Date(msg.created_at).toDateString()
+    if (!acc[dateKey]) acc[dateKey] = []
+    acc[dateKey].push(msg)
+    return acc
+  }, {} as Record<string, typeof messages>)
+
+
   return (
     <main className="flex-1 flex flex-col bg-[#ece5dd]" style={{ backgroundImage: `url(${whatsappBg.src})` }}>
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-4 bg-white border-b border-gray-300">
         <div className="flex items-center gap-4">
           <Image
-            src={selectedChat?.avatar_url || avatar}
-            alt={selectedChat?.name || 'Chat Avatar'}
+            src={
+              selectedChat?.is_group
+                ? selectedChat.avatar_url || avatar
+                : participants.find(p => p.id !== userId)?.avatar_url || avatar
+            }
+            alt="Chat Avatar"
             width={40}
             height={40}
-            className="w-10 h-10 rounded-full object-cover" />
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          
           <div className="flex flex-col">
-            <h1 className="text-lg font-semibold text-gray-800">{selectedChat?.name}</h1>
-            <span className="text-xs text-gray-500">
-              {participants.map((p) => p.full_name).join(', ')}
-            </span>
+            {selectedChat?.is_group ? (
+              <>
+                <h1 className="text-lg font-semibold text-gray-800">
+                  {selectedChat?.name || 'Group'}
+                </h1>
+                <span className="text-xs text-gray-500">
+                  {participants.map((p) => p.full_name).join(', ')}
+                </span>
+              </>
+            ) : (
+              <>
+                <h1 className="text-lg font-semibold text-gray-800">
+                  {participants.find(p => p.id !== userId)?.full_name || 'Chat'}
+                </h1>
+              </>
+            )}
           </div>
         </div>
+
         <div className="flex -space-x-3 pr-2">
           {participants.map((user) => (
             <div key={user.id} className="relative w-8 h-8 rounded-full">
@@ -146,37 +209,56 @@ export default function Main({ selectedChat, userId }: Props) {
      {/* Messages */}
       <div className="flex-1 px-6 py-4 overflow-y-auto">
         <div className="flex flex-col gap-3">
-          {messages.map((msg) => {
-            const isMe = msg.sender_id === userId
-            return (
-              <div
-                key={msg.id}
-                className={`flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}
-              >
-                {!isMe && (
-                  <Image
-                    src={msg.sender?.avatar_url || avatar}
-                    alt={msg.sender?.full_name}
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-                <div className={`max-w-xs p-3 rounded-md shadow-sm ${isMe ? 'bg-green-100' : 'bg-white'}`}>
-                  <div className="text-xs text-gray-600 font-medium">
-                    {msg.sender?.full_name || 'Unknown'} • {msg.sender?.mobile || 'N/A'}
-                  </div>
-                  <div className="text-sm text-gray-800">{msg.content}</div>
-                  <div className="text-[10px] text-gray-400 text-right mt-1">
-                    {new Date(msg.created_at).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </div>
-                </div>
+          {Object.entries(groupedMessages).map(([date, msgs]) => (
+            <div key={date}>
+              <div className="flex justify-center my-4">
+                <span className="bg-[#e1f3fb] text-gray-700 text-xs px-4 py-1 rounded-full shadow-sm">
+                  {formatDateLabel(date)}
+                </span>
               </div>
-            )
-          })}
+
+              {msgs.map((msg) => {
+                const isMe = msg.sender_id === userId
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2 py-1`}
+                  >
+                    {!isMe && (
+                      <Image
+                        src={msg.sender?.avatar_url || avatar}
+                        alt={msg.sender?.full_name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    )}
+                    <div className={`max-w-xs p-3 rounded-md shadow-sm ${isMe ? 'bg-green-100' : 'bg-white'}`}>
+                      <div className="text-xs text-gray-600 font-medium">
+                        {msg.sender?.full_name || 'Unknown'} • {msg.sender?.mobile || 'N/A'}
+                      </div>
+                      <div className="text-sm text-gray-800">{msg.content}</div>
+                      <div className="flex justify-end mt-1 text-gray-500 text-xs gap-1 pr-1 items-center">
+                        <span className="text-[11px]">
+                          {new Date(msg.created_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        {isMe && (
+                          msg.seen ? (
+                            <BsCheckAll className="text-[15px] text-blue-500" />
+                          ) : (
+                            <BsCheck className="text-[15px]" />
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
           <div ref={bottomRef} />
         </div>
       </div>
