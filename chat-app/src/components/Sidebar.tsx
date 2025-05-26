@@ -14,17 +14,21 @@ import {
   MdStarOutline,
   MdOutlineStar,
 } from 'react-icons/md'
-import { FaUserCircle } from 'react-icons/fa'
-import { BsPeopleFill, BsThreeDotsVertical, BsSearch } from 'react-icons/bs'
+import { BsCheck, BsCheckAll } from 'react-icons/bs'
+import { FaPhone } from "react-icons/fa6";
+import { BsPeopleFill } from 'react-icons/bs'
 import { IoMdBook } from 'react-icons/io'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 import { Chat } from '@/types'
 import { supabase } from '@/lib/supabase'
+
 import CreateChatModal from '@/components/CreateChatModal'
+import FilterBar from '@/components/Filter'
 
 import avatar from '../assets/avatar.png'
+import { formatRelativeTime } from '@/utils/dateUtils'
 
 type Props = {
   onSelectChat: (chat: Chat) => void
@@ -49,6 +53,11 @@ const sidebarItems = [
   { icon: <MdStarOutline size={24} />, label: 'Starred' },
 ]
 
+const chatLabelColors = {
+  demo: { bg: 'bg-orange-100', text: 'text-orange-700' },
+  internal: { bg: 'bg-green-100', text: 'text-green-700' },
+};
+
 export default function Sidebar({
   onSelectChat,
   selectedChat,
@@ -70,9 +79,16 @@ export default function Sidebar({
           name,
           is_group,
           avatar_url,
+          label,
           messages (
             content,
-            created_at
+            created_at,
+            sender_id,
+            seen,
+            sender:users (
+              id,
+              full_name
+            )
           ),
           chat_participants (
             user_id,
@@ -96,7 +112,23 @@ export default function Sidebar({
 
   useEffect(() => {
     fetchChats()
+
+    const channel = supabase
+      .channel('chat-sidebar-sync')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          fetchChats()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [userId])
+
 
   return (
     <div className="flex h-screen">
@@ -126,22 +158,10 @@ export default function Sidebar({
 
       {/* Chat List Sidebar */}
       <div className="relative w-[28%] min-w-[500px] bg-white border-r border-gray-300 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-300">
-          <FaUserCircle className="text-3xl text-gray-600" />
-          <BsThreeDotsVertical className="text-xl text-gray-600" />
-        </div>
 
         {/* Search */}
-        <div className="px-4 py-2 border-b border-gray-300">
-          <div className="flex items-center bg-gray-100 px-3 py-2 rounded-md">
-            <BsSearch className="text-gray-500 mr-2" />
-            <input
-              className="bg-transparent w-full outline-none text-sm"
-              type="text"
-              placeholder="Search or start new chat"
-            />
-          </div>
+        <div className="p-4 border-b bg-gray-50 border-gray-300 overflow-x-hidden">
+          <FilterBar />
         </div>
 
         {/* Chat List */}
@@ -181,28 +201,106 @@ export default function Sidebar({
               <div
                 key={chat.id}
                 onClick={() => onSelectChat(chat)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 ${
+                className={`relative flex items-start gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 ${
                   selectedChat?.id === chat.id ? 'bg-green-50' : ''
                 }`}
               >
+                {/* Avatar */}
                 <Image
                   src={avatarUrl}
                   alt="chat avatar"
                   width={40}
                   height={40}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover mt-1"
                 />
+
+                {/* Chat Details */}
                 <div className="flex flex-col w-full">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium">{displayName}</span>
-                    <span className="text-xs text-gray-500">{lastMessageTime}</span>
+                  <div className="flex justify-between items-center w-full text-sm">
+                    <span className="font-medium text-gray-800 truncate">{displayName}</span>
+
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {chat.label &&
+                        chat.label.split(',').map((labelStr, index) => {
+                          const trimmed = labelStr.trim()
+                          const colors =
+                            chatLabelColors[trimmed.toLowerCase()] || {
+                              bg: 'bg-gray-200',
+                              text: 'text-gray-700',
+                            }
+                          return (
+                            <span
+                              key={index}
+                              className={`text-[10px] px-2 py-0.5 rounded-md uppercase font-semibold tracking-wider ${colors.bg} ${colors.text}`}
+                            >
+                              {trimmed}
+                            </span>
+                          )
+                        })}
+                    </div>
                   </div>
-                  <span className="text-sm text-gray-500 truncate">{lastMessage}</span>
-                  {mobile && (
-                    <span className="text-xs text-gray-400 truncate">{mobile}</span>
+
+                  {/* Row 2: Sender + Last message + Time */}
+                  {chat.messages.length > 0 ? (
+                    <div className="flex items-center gap-1 truncate w-[80%]">
+                      {chat.messages[chat.messages.length - 1].sender_id === userId && (
+                        chat.messages[chat.messages.length - 1].seen ? (
+                          <BsCheckAll className="text-blue-500 text-sm" />
+                        ) : (
+                          <BsCheck className="text-gray-500 text-sm" />
+                        )
+                      )}
+                      <span className="truncate">
+                        {chat.messages[chat.messages.length - 1].sender_id === userId
+                          ? 'You'
+                          : chat.messages[chat.messages.length - 1]?.sender?.full_name || 'Someone'}
+                        : {chat.messages[chat.messages.length - 1]?.content}
+                      </span>
+                      
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 text-sm">No messages yet</span>
                   )}
+
+
+
+                  {/* Row 3: Mobile + Others */}
+                  <div className="flex justify-between text-sm text-gray-600 mt-0.5">
+                    {chat.chat_participants.length > 0 && (
+                      <div className="mt-1 flex justify-between items-center">
+                        <span
+                          className="
+                            text-xs text-gray-700 inline-flex items-center rounded-full
+                            border border-gray-300 bg-gray-100 px-2 py-0.5 gap-x-1
+                          "
+                        >
+                          <FaPhone className="text-gray-500 text-xs" />
+                          {chat.is_group ? (
+                            <>
+                              {chat.chat_participants[0]?.users?.mobile || 'N/A'}
+                              {chat.chat_participants.length > 1 && (
+                                <span className="font-bold ml-1">
+                                  {`+${chat.chat_participants.length - 1}`}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            mobile
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                      {chat.messages.length
+                        ? formatRelativeTime(
+                            chat.messages[chat.messages.length - 1].created_at
+                          )
+                        : ''}
+                    </span>
+                  </div>
                 </div>
               </div>
+
             )
           })}
         </div>
