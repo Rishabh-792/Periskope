@@ -1,22 +1,25 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  images:{
+  reactStrictMode: true,
+  experimental: {
+    appDir: true, // Only if you're using the App Router
+  },
+  images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
-        {
-          protocol: 'https', // The protocol (http or https)
-          hostname: 'robohash.org', // The exact hostname
-        },
-        {
-          protocol: 'https', // The protocol (http or https)
-          hostname: 'api.dicebear.com', // The exact hostname
-        },
-      ]
-  }
-};
+      {
+        protocol: 'https',
+        hostname: 'robohash.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
+    ],
+  },
+}
 
-export default nextConfig;
+export default nextConfig
