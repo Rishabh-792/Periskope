@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💬 Chat App
 
-## Getting Started
+A fully functional real-time chat application built with **Next.js**, **Supabase**, **Tailwind CSS**, and **TypeScript**. This app supports both one-on-one and group messaging with real-time updates and a sleek user interface.
 
-First, run the development server:
+---
 
+🌐 [Open the Chat App](https://periskope-bay.vercel.app/)
+
+## 📸 Screenshots
+
+| Login Page                        | One-on-One Chat                          | Group Chat                             | Chat Page                          |
+| --------------------------------- | ---------------------------------------- | -------------------------------------- | ---------------------------------- |
+| ![Login](./screenshots/login.jpg) | ![1-on-1 Chat](./screenshots/single.jpg) | ![Group Chat](./screenshots/group.jpg) | ![Chat App](./screenshots/app.jpg) |
+
+---
+
+## 🚀 Features
+
+### 🔐 Authentication
+
+-   Login using Supabase Auth.
+-   Unauthenticated users are redirected to the login page.
+
+### 🧑‍🤝‍🧑 Chat Types
+
+-   **One-on-one chats** with individual users.
+-   **Group chats** with multiple participants.
+-   Group avatar and name support.
+
+### 💬 Real-Time Messaging
+
+-   Real-time message updates using Supabase's Realtime API.
+-   Typing a message and pressing send updates both sender and receiver chats instantly.
+-   Messages are saved to Supabase and displayed in real time.
+
+### 🖼️ UI and UX
+
+-   Pixel-perfect design, fully replicating the provided mockup.
+-   Responsive layout for mobile and desktop.
+-   Sidebar includes:
+    -   User/group name
+    -   Last message preview
+    -   Avatar
+    -   Timestamp formatted as "Today", "Yesterday", or date
+-   Floating "+" button to create a new chat or group.
+
+### 🧠 Chat Creation
+
+-   Modal to:
+    -   Start a one-on-one chat by selecting one user.
+    -   Create a group chat with group name, avatar, and multiple users.
+-   Newly created chat is automatically opened.
+
+### ✅ Message Grouping & Status
+
+-   Messages grouped by date.
+-   Message status indicators:
+    -   ✔ Sent
+    -   ✔✔ Seen
+
+### ✍️ Typing Indicator
+
+-   Shows a real-time "User is typing..." indicator when participants are typing.
+
+---
+
+## 🧱 Supabase Database Schema
+
+### Tables:
+
+-   **users**: stores user info (id, name, avatar_url, phone).
+-   **chats**: stores chat data (id, is_group, group name, avatar).
+-   **participants**: connects users and chats.
+-   **messages**: stores individual messages (content, sender, timestamp, status).
+
+### Features:
+
+-   Real-time updates via Supabase Realtime.
+-   Row Level Security (RLS) policies to ensure secure access control.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer    | Technology                                               |
+| -------- | -------------------------------------------------------- |
+| Frontend | Next.js 15 (App Router), Tailwind CSS, TypeScript        |
+| Backend  | Supabase (PostgreSQL, Auth, Realtime)                    |
+| Auth     | Supabase Auth                                            |
+| Icons    | [React Icons](https://react-icons.github.io/react-icons) |
+| Styling  | Tailwind CSS                                             |
+
+---
+
+## 📂 Folder Structure
+
+src/
+├── app/ # Route-based components (e.g., login, chats)
+├── components/ # UI components like Sidebar, Main, MessageBubble, Modal
+├── lib/ # Supabase client and helper functions
+├── styles/ # Global styles
+
+---
+
+## 🧪 Running Locally
+
+1. Clone the repository:
+
+````bash
+git clone https://github.com/Rishabh-792/Periskope.git
+cd Periskope
+npm install
+
+2. Install dependencies:
+ ```bash
+npm install
+
+3. Create a .env.local file and add your Supabase credentials:
+ ```bash
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+
+4. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧪 Deployment
+🌐 [Open the Chat App](https://periskope-bay.vercel.app/login)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+````
