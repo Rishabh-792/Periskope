@@ -146,8 +146,8 @@ export default function Sidebar({
           ))}
         </div>
         <div className="mt-auto">
-          <TbStarsFilled size={24} className="text-gray-500 hover:text-green-500" />
-          <HiMiniArrowRightOnRectangle size={24} className="text-gray-500 hover:text-green-500" />
+          <TbStarsFilled size={24} className="text-gray-500 hover:text-green-500 m-2" />
+          <HiMiniArrowRightOnRectangle size={24} className="text-gray-500 hover:text-green-500 m-2" />
         </div>
       </aside>
 
