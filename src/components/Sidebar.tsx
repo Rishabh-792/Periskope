@@ -47,10 +47,12 @@ const sidebarItems = [
   { icon: <MdOutlineSettings size={24} />, label: 'Settings' },
 ]
 
-const chatLabelColors = {
-  demo: { bg: 'bg-orange-100', text: 'text-orange-700' },
-  internal: { bg: 'bg-green-100', text: 'text-green-700' },
-};
+const chatLabelColors: {
+  [key: string]: { bg: string; text: string }
+} = {
+  demo: { bg: 'bg-blue-200', text: 'text-blue-800' },
+  internal: { bg: 'bg-green-200', text: 'text-green-800' },
+}
 
 export default function Sidebar({
   onSelectChat,
@@ -216,7 +218,7 @@ export default function Sidebar({
 
                     <div className="flex flex-wrap gap-1 justify-end">
                       {chat.label &&
-                        chat.label.split(',').map((labelStr, index) => {
+                        chat.label.split(',').map((labelStr: string, index: number) => {
                           const trimmed = labelStr.trim()
                           const colors =
                             chatLabelColors[trimmed.toLowerCase()] || {

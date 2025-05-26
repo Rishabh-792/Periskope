@@ -2,6 +2,8 @@ export type Chat = {
   id: string
   name: string
   created_at: string
+  avatar_url?: string;
+  is_group: boolean; 
 }
 
 export type Message = {
