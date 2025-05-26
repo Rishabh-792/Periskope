@@ -93,41 +93,58 @@ A fully functional real-time chat application built with **Next.js**, **Supabase
 ---
 
 ## 📂 Folder Structure
-
+````
 src/
-├── app/ # Route-based components (e.g., login, chats)
-├── components/ # UI components like Sidebar, Main, MessageBubble, Modal
-├── lib/ # Supabase client and helper functions
-├── styles/ # Global styles
-
----
-
-## 🧪 Running Locally
+  ├── app
+  │   ├── chats
+  │   │   └── page.tsx
+  │   ├── favicon.ico
+  │   ├── globals.css
+  │   ├── layout.tsx
+  │   ├── login
+  │   │   └── page.tsx
+  │   └── page.tsx
+  ├── assets
+  │   ├── avatar.png
+  │   └── bg.png
+  ├── components
+  │   ├── CreateChatModal.tsx
+  │   ├── Filter.tsx
+  │   ├── Main.tsx
+  │   └── Sidebar.tsx
+  ├── lib
+  │   └── supabase.ts
+  ├── types.ts
+  └── utils
+      └── dateUtils.ts
+````
 
 1. Clone the repository:
 
-````bash
+```bash
 git clone https://github.com/Rishabh-792/Periskope.git
 cd Periskope
-npm install
+```
 
 2. Install dependencies:
- ```bash
+
+```bash
 npm install
+```
 
 3. Create a .env.local file and add your Supabase credentials:
- ```bash
+
+```bash
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-
+```
 
 4. Run the development server:
+
 ```bash
 npm run dev
-
+```
 
 ## 🧪 Deployment
+
 🌐 [Open the Chat App](https://periskope-bay.vercel.app/login)
-
-
-````
