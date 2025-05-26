@@ -5,7 +5,6 @@ import {
   MdList,
   MdCampaign,
   MdOutlineSettings,
-  MdOutlineVideoLibrary,
   MdChecklist,
 } from 'react-icons/md'
 import { TbStarsFilled } from "react-icons/tb";
@@ -128,7 +127,7 @@ export default function Sidebar({
   return (
     <div className="flex h-screen">
       {/* Icon Sidebar */}
-      <aside className="w-16 flex flex-col items-center justify-between bg-white border-r py-4">
+      <aside className="w-16 flex flex-col items-center justify-between bg-white border-r border-gray-200 py-4">
         <div className="mb-6">
           <Image src={avatar} alt="Logo" width={32} height={32} className="rounded-full" />
         </div>
