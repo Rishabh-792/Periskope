@@ -2,22 +2,19 @@
 
 import {
   MdHome,
-  MdChat,
-  MdConfirmationNumber,
-  MdBarChart,
   MdList,
   MdCampaign,
   MdOutlineSettings,
   MdOutlineVideoLibrary,
-  MdPhoto,
-  MdCompareArrows,
-  MdStarOutline,
-  MdOutlineStar,
+  MdChecklist,
 } from 'react-icons/md'
+import { TbStarsFilled } from "react-icons/tb";
+import { AiOutlineWechatWork, AiFillMessage } from "react-icons/ai";
+import { RiOrganizationChart, RiContactsBookLine, RiFolderImageFill } from "react-icons/ri";
 import { BsCheck, BsCheckAll } from 'react-icons/bs'
-import { FaPhone } from "react-icons/fa6";
-import { BsPeopleFill } from 'react-icons/bs'
-import { IoMdBook } from 'react-icons/io'
+import { HiMiniArrowRightOnRectangle } from "react-icons/hi2";
+import { FaPhone, FaChartLine } from "react-icons/fa6";
+import { IoTicket } from "react-icons/io5";
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -39,18 +36,16 @@ type Props = {
 
 const sidebarItems = [
   { icon: <MdHome size={24} />, label: 'Home' },
-  { icon: <MdChat size={24} />, label: 'Chat', active: true },
-  { icon: <MdConfirmationNumber size={24} />, label: 'Tickets' },
-  { icon: <MdBarChart size={24} />, label: 'Analytics' },
+  { icon: <AiFillMessage size={24} />, label: 'Chat', active: true },
+  { icon: <IoTicket size={24} />, label: 'Tickets' },
+  { icon: <FaChartLine size={24} />, label: 'Analytics' },
   { icon: <MdList size={24} />, label: 'Tasks' },
   { icon: <MdCampaign size={24} />, label: 'Announcements' },
-  { icon: <BsPeopleFill size={24} />, label: 'Users' },
-  { icon: <IoMdBook size={24} />, label: 'Library' },
-  { icon: <MdPhoto size={24} />, label: 'Media' },
-  { icon: <MdCompareArrows size={24} />, label: 'Sync' },
+  { icon: <RiOrganizationChart size={24} />, label: 'Users' },
+  { icon: <RiContactsBookLine size={24} />, label: 'Library' },
+  { icon: <RiFolderImageFill size={24} />, label: 'Media' },
+  { icon: <MdChecklist size={24} />, label: 'Sync' },
   { icon: <MdOutlineSettings size={24} />, label: 'Settings' },
-  { icon: <MdOutlineStar size={24} />, label: 'Favorites' },
-  { icon: <MdStarOutline size={24} />, label: 'Starred' },
 ]
 
 const chatLabelColors = {
@@ -152,7 +147,8 @@ export default function Sidebar({
           ))}
         </div>
         <div className="mt-auto">
-          <MdOutlineVideoLibrary size={24} className="text-gray-500 hover:text-green-500" />
+          <TbStarsFilled size={24} className="text-gray-500 hover:text-green-500" />
+          <HiMiniArrowRightOnRectangle size={24} className="text-gray-500 hover:text-green-500" />
         </div>
       </aside>
 
@@ -312,7 +308,7 @@ export default function Sidebar({
             className="bg-green-600 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-md hover:bg-green-700 transition"
             title="New Chat"
           >
-            +
+            <AiOutlineWechatWork className='w-8 h-8'/>
           </button>
         </div>
 

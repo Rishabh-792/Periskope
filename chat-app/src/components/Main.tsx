@@ -152,7 +152,7 @@ export default function Main({ selectedChat, userId }: Props) {
 
 
   return (
-    <main className="flex-1 flex flex-col bg-[#ece5dd]" style={{ backgroundImage: `url(${whatsappBg.src})` }}>
+    <main className="flex-1 flex flex-col bg-[#ece5dd] h-full w-full" style={{ backgroundImage: `url(${whatsappBg.src})` }}>
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-4 bg-white border-b border-gray-300">
         <div className="flex items-center gap-4">
