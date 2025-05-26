@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Main from '@/components/Main'
 import { Chat, Message } from '@/types'
 
+
 export default function ChatPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
